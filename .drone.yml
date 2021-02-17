@@ -6,3 +6,8 @@ steps:
     image: chef/chefworkstation
     commands:
       - cookstyle .
+
+trigger:
+  event:
+    exclude:
+      - promote
