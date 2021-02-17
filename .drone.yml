@@ -7,7 +7,40 @@ steps:
     commands:
       - cookstyle .
 
+  - name: rspec
+    image: chef/chefworkstation
+    commands:
+      - chef exec rspec . --format documentation
+
 trigger:
   event:
     exclude:
       - promote
+
+---
+kind: pipeline
+name: build
+
+globals:
+  - &drone_vars
+    CHEF_LICENSE: accept
+
+steps:
+  - name: build artifact
+    image: chef/chefworkstation
+    environment:
+      <<: *drone_vars
+    commands:
+      - chef install
+      - chef export . -a
+      - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
+      - ls -al
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+depends_on:
+  - test
