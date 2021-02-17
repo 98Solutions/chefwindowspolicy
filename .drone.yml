@@ -1,0 +1,8 @@
+kind: pipeline
+name: test
+
+steps:
+  - name: cookstyle
+    image: chef/chefworkstation
+    commands:
+      - cookstyle .
