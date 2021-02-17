@@ -9,6 +9,8 @@ steps:
 
   - name: rspec
     image: chef/chefworkstation
+    environment:
+      CHEF_LICENSE: accept
     commands:
       - chef exec rspec . --format documentation
 
