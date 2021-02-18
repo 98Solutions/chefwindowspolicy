@@ -21,7 +21,7 @@ trigger:
 
 ---
 kind: pipeline
-name: build
+name: build and upload
 
 globals:
   - &drone_vars
@@ -49,7 +49,9 @@ steps:
     environment:
       <<: *drone_vars
     commands:
-      - for filename in *.tgz; do az storage blob upload -f $filename -n $filename -c $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN ; done; 
+      - ls -al
+      - echo $AZURE_STORAGE_SAS_TOKEN
+      - for filename in *.tgz; do az storage blob upload --filename $filename -name $filename --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN; done; 
 
 trigger:
   branch:
