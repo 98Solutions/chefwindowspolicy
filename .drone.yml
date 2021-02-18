@@ -25,6 +25,12 @@ name: build
 
 globals:
   - &drone_vars
+    AZURE_STORAGE_ACCOUNT_NAME:
+      from_secret: AZ_STORAGE_ACCOUNT_NAME
+    AZURE_STORAGE_CONTAINER_NAME:
+      from_secret: AZ_STORAGE_CONTAINER_NAME
+    AZURE_STORAGE_SAS_TOKEN:
+      from_secret: AZ_STORAGE_SAS_TOKEN
     CHEF_LICENSE: accept
 
 steps:
@@ -37,6 +43,13 @@ steps:
       - chef export . -a
       - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
       - ls -al
+
+  - name: upload artifact
+    image: mcr.microsoft.com/azure-cli
+    environment:
+      <<: *drone_vars
+    commands:
+      - for filename in *.tgz; do az storage blob upload -f $filename -n $filename -c $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN ; done; 
 
 trigger:
   branch:
