@@ -52,7 +52,7 @@ steps:
       - ls -al
       - ARTIFACT_NAME="$(ls | grep *.tgz)"
       - echo $ARTIFACT_NAME
-      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name 'policytar' --account-name 'droneteststorage98' --sas-token $AZURE_STORAGE_SAS_TOKEN
+      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
 
 trigger:
   branch:
