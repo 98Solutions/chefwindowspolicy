@@ -50,8 +50,9 @@ steps:
       <<: *drone_vars
     commands:
       - ls -al
-      - ARTIFACT_NAME="$(ls | grep *.tgz)" 
-      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token '"sp=rwl&st=2021-02-18T04:18:57Z&se=2021-03-17T11:18:57Z&spr=https&sv=2020-02-10&sr=c&sig=heab0mxhGw38Id4CXhlSOxlZM8cp2zk8g%2FDA1ts8nyE%3D"'
+      - ARTIFACT_NAME="$(ls | grep *.tgz)"
+      - echo $ARTIFACT_NAME 
+      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
 
 trigger:
   branch:
