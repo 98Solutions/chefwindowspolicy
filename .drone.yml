@@ -51,7 +51,7 @@ steps:
     commands:
       - ls -al
       - echo $AZURE_STORAGE_SAS_TOKEN > sastoken.txt
-      - sudo cat sastoken.txt
+      - cat sastoken.txt
       - ARTIFACT_NAME="$(ls | grep *.tgz)" 
       - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN; done; 
 
