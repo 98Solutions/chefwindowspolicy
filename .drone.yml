@@ -50,8 +50,9 @@ steps:
       <<: *drone_vars
     commands:
       - ls -al
-      - echo $AZURE_STORAGE_SAS_TOKEN
-      - for filename in *.tgz; do az storage blob upload --filename $filename -name $filename --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN; done; 
+      - echo $AZURE_STORAGE_SAS_TOKEN > sastoken.txt
+      - echo sastoken.txt
+      - for filename in *.tgz; do az storage blob upload --file $filename -name $filename --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN; done; 
 
 trigger:
   branch:
