@@ -60,5 +60,5 @@ trigger:
   event:
     - push
 
-depends_on:
-  - test
+# depends_on:
+#   - test
