@@ -97,10 +97,11 @@ steps:
     environment:
       <<: *drone_vars
     commands:
-      #- ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN | grep '38-chefwindowspolicy' | awk '{print $4}')"
+      - ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN --query "[].{name:name}" --output tsv | grep '38-chefwindowspolicy' | awk '{print $4}')"
+      - echo $ARTIFACT_NAME
       #- az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
       - ls -al
-      - az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN --query "[].{name:name}" --output tsv
+      #- az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN --query "[].{name:name}" --output tsv
 
   # - name: apply policy
   #   image: chef/chefworkstation
