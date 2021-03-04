@@ -62,3 +62,44 @@ trigger:
 
 depends_on:
   - test
+---
+kind: pipeline
+name: deploy
+
+globals:
+  - &drone_vars
+    AZURE_STORAGE_ACCOUNT_NAME:
+      from_secret: AZ_STORAGE_ACCOUNT_NAME
+    AZURE_STORAGE_CONTAINER_NAME:
+      from_secret: AZ_STORAGE_CONTAINER_NAME
+    AZURE_STORAGE_SAS_TOKEN:
+      from_secret: AZ_STORAGE_SAS_TOKEN
+    CHEF_LICENSE: accept
+
+steps:
+  - name: download artifact
+    image: mcr.microsoft.com/azure-cli
+    environment:
+      <<: *drone_vars
+    commands:
+      - ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN | grep $DRONE_BUILD_PARENT'-chefwindowspolicy' | awk '{print $4}')"
+      - az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
+      - ls -al
+
+  - name: apply policy
+    image: chef/chefworkstation
+    environment:
+      CHEF_LICENSE: accept
+    commands:
+      - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
+      - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
+
+trigger:
+  branch:
+    - master
+  event:
+    - promote
+  target:
+    include:
+      - acc
+      - prod
