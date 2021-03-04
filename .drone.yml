@@ -14,6 +14,21 @@ steps:
     commands:
       - chef exec rspec . --format documentation
 
+  - name: kitchen verify
+    image: chef/chefworkstation
+    environment:
+      CHEF_LICENSE: accept
+    commands:
+      - mkdir ~/.ssh
+      - mkdir ~/.aws
+      # - echo $AWS_EC2_PEM > ~/.ssh/drone_testkitchen.pem
+      # - echo $AWS_CONFIG > ~/.aws/config
+      # - kitchen test -c --destroy=always
+    when:
+      ref:
+        - refs/heads/master
+        - refs/pull/**
+
 trigger:
   event:
     exclude:
