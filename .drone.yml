@@ -1,83 +1,83 @@
-kind: pipeline
-name: test
+# kind: pipeline
+# name: test
 
-steps:
-  - name: cookstyle
-    image: chef/chefworkstation
-    commands:
-      - cookstyle .
+# steps:
+#   - name: cookstyle
+#     image: chef/chefworkstation
+#     commands:
+#       - cookstyle .
 
-  - name: rspec
-    image: chef/chefworkstation
-    environment:
-      CHEF_LICENSE: accept
-    commands:
-      - chef exec rspec . --format documentation
+#   - name: rspec
+#     image: chef/chefworkstation
+#     environment:
+#       CHEF_LICENSE: accept
+#     commands:
+#       - chef exec rspec . --format documentation
 
-  - name: kitchen verify
-    image: chef/chefworkstation
-    environment:
-      CHEF_LICENSE: accept
-    commands:
-      - mkdir ~/.ssh
-      - mkdir ~/.aws
-      # - echo $AWS_EC2_PEM > ~/.ssh/drone_testkitchen.pem
-      # - echo $AWS_CONFIG > ~/.aws/config
-      # - kitchen test -c --destroy=always
-    when:
-      ref:
-        - refs/heads/master
-        - refs/pull/**
+#   - name: kitchen verify
+#     image: chef/chefworkstation
+#     environment:
+#       CHEF_LICENSE: accept
+#     commands:
+#       - mkdir ~/.ssh
+#       - mkdir ~/.aws
+#       # - echo $AWS_EC2_PEM > ~/.ssh/drone_testkitchen.pem
+#       # - echo $AWS_CONFIG > ~/.aws/config
+#       # - kitchen test -c --destroy=always
+#     when:
+#       ref:
+#         - refs/heads/master
+#         - refs/pull/**
 
-trigger:
-  event:
-    exclude:
-      - promote
+# trigger:
+#   event:
+#     exclude:
+#       - promote
 
----
-kind: pipeline
-name: build and upload
+# ---
+# kind: pipeline
+# name: build and upload
 
-globals:
-  - &drone_vars
-    AZURE_STORAGE_ACCOUNT_NAME:
-      from_secret: AZ_STORAGE_ACCOUNT_NAME
-    AZURE_STORAGE_CONTAINER_NAME:
-      from_secret: AZ_STORAGE_CONTAINER_NAME
-    AZURE_STORAGE_SAS_TOKEN:
-      from_secret: AZ_STORAGE_SAS_TOKEN
-    CHEF_LICENSE: accept
+# globals:
+#   - &drone_vars
+#     AZURE_STORAGE_ACCOUNT_NAME:
+#       from_secret: AZ_STORAGE_ACCOUNT_NAME
+#     AZURE_STORAGE_CONTAINER_NAME:
+#       from_secret: AZ_STORAGE_CONTAINER_NAME
+#     AZURE_STORAGE_SAS_TOKEN:
+#       from_secret: AZ_STORAGE_SAS_TOKEN
+#     CHEF_LICENSE: accept
 
-steps:
-  - name: build artifact
-    image: chef/chefworkstation
-    environment:
-      <<: *drone_vars
-    commands:
-      - chef install
-      - chef export . -a
-      - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
-      - ls -al
+# steps:
+#   - name: build artifact
+#     image: chef/chefworkstation
+#     environment:
+#       <<: *drone_vars
+#     commands:
+#       - chef install
+#       - chef export . -a
+#       - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
+#       - ls -al
 
-  - name: upload artifact
-    image: mcr.microsoft.com/azure-cli
-    environment:
-      <<: *drone_vars
-    commands:
-      - ls -al
-      - ARTIFACT_NAME="$(ls | grep *.tgz)"
-      - echo $ARTIFACT_NAME
-      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
+#   - name: upload artifact
+#     image: mcr.microsoft.com/azure-cli
+#     environment:
+#       <<: *drone_vars
+#     commands:
+#       - ls -al
+#       - ARTIFACT_NAME="$(ls | grep *.tgz)"
+#       - echo $ARTIFACT_NAME
+#       - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
 
-trigger:
-  branch:
-    - main
-  event:
-    - push
+# trigger:
+#   branch:
+#     - main
+#   event:
+#     - push
 
-depends_on:
-  - test
----
+# depends_on:
+#   - test
+# ---
 kind: pipeline
 name: deploy
 
@@ -97,24 +97,28 @@ steps:
     environment:
       <<: *drone_vars
     commands:
-      - ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN | grep $DRONE_BUILD_PARENT'-chefwindowspolicy' | awk '{print $4}')"
-      - az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
+      #- ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN | grep '38-chefwindowspolicy' | awk '{print $4}')"
+      #- az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
       - ls -al
+      - az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
 
-  - name: apply policy
-    image: chef/chefworkstation
-    environment:
-      CHEF_LICENSE: accept
-    commands:
-      - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
-      - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
+  # - name: apply policy
+  #   image: chef/chefworkstation
+  #   environment:
+  #     CHEF_LICENSE: accept
+  #   commands:
+  #     - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
+  #     - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
 
+# trigger:
+#   branch:
+#     - main
+#   event:
+#     - promote
+#   target:
+#     include:
+#       - acc
+#       - prod
 trigger:
-  branch:
-    - main
   event:
-    - promote
-  target:
-    include:
-      - acc
-      - prod
+  - push
