@@ -26,7 +26,7 @@ steps:
       # - kitchen test -c --destroy=always
     when:
       ref:
-        - refs/heads/master
+        - refs/heads/main
         - refs/pull/**
 
 trigger:
