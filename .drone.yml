@@ -21,9 +21,6 @@ steps:
     commands:
       - mkdir ~/.ssh
       - mkdir ~/.aws
-      # - echo $AWS_EC2_PEM > ~/.ssh/drone_testkitchen.pem
-      # - echo $AWS_CONFIG > ~/.aws/config
-      # - kitchen test -c --destroy=always
     when:
       ref:
         - refs/heads/main
@@ -34,49 +31,49 @@ trigger:
     exclude:
       - promote
 
----
-kind: pipeline
-name: build and upload
+# ---
+# kind: pipeline
+# name: build and upload
 
-globals:
-  - &drone_vars
-    AZURE_STORAGE_ACCOUNT_NAME:
-      from_secret: AZ_STORAGE_ACCOUNT_NAME
-    AZURE_STORAGE_CONTAINER_NAME:
-      from_secret: AZ_STORAGE_CONTAINER_NAME
-    AZURE_STORAGE_SAS_TOKEN:
-      from_secret: AZ_STORAGE_SAS_TOKEN
-    CHEF_LICENSE: accept
+# globals:
+#   - &drone_vars
+#     AZURE_STORAGE_ACCOUNT_NAME:
+#       from_secret: AZ_STORAGE_ACCOUNT_NAME
+#     AZURE_STORAGE_CONTAINER_NAME:
+#       from_secret: AZ_STORAGE_CONTAINER_NAME
+#     AZURE_STORAGE_SAS_TOKEN:
+#       from_secret: AZ_STORAGE_SAS_TOKEN
+#     CHEF_LICENSE: accept
 
-steps:
-  - name: build artifact
-    image: chef/chefworkstation
-    environment:
-      <<: *drone_vars
-    commands:
-      - chef install
-      - chef export . -a
-      - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
-      - ls -al
+# steps:
+#   - name: build artifact
+#     image: chef/chefworkstation
+#     environment:
+#       <<: *drone_vars
+#     commands:
+#       - chef install
+#       - chef export . -a
+#       - for filename in *.tgz; do mv "$filename" "${DRONE_BUILD_NUMBER}-$filename"; done;
+#       - ls -al
 
-  - name: upload artifact
-    image: mcr.microsoft.com/azure-cli
-    environment:
-      <<: *drone_vars
-    commands:
-      - ls -al
-      - ARTIFACT_NAME="$(ls | grep *.tgz)"
-      - echo $ARTIFACT_NAME
-      - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
+#   - name: upload artifact
+#     image: mcr.microsoft.com/azure-cli
+#     environment:
+#       <<: *drone_vars
+#     commands:
+#       - ls -al
+#       - ARTIFACT_NAME="$(ls | grep *.tgz)"
+#       - echo $ARTIFACT_NAME
+#       - az storage blob upload --file $ARTIFACT_NAME --name $ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
 
-trigger:
-  branch:
-    - main
-  event:
-    - push
+# trigger:
+#   branch:
+#     - main
+#   event:
+#     - push
 
-depends_on:
-  - test
+# depends_on:
+#   - test
 ---
 kind: pipeline
 name: deploy
@@ -106,8 +103,9 @@ steps:
     environment:
       CHEF_LICENSE: accept
     commands:
-      - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
-      - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
+      # - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
+      # - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
+      - if [ $COMP = "SQL" ]; then echo "Deploying SQL DACPACs to $DRONE_DEPLOY_TO"; elif [ $COMP = "ADF" ]; then echo "Deploying ADF Pipelines to $DRONE_DEPLOY_TO"; else echo "Deploying both SQL and ADF to $DRONE_DEPLOY_TO"; fi;
 
 trigger:
   branch:
