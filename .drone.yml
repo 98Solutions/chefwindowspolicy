@@ -89,14 +89,14 @@ globals:
     CHEF_LICENSE: accept
 
 steps:
-  - name: download artifact
-    image: mcr.microsoft.com/azure-cli
-    environment:
-      <<: *drone_vars
-    commands:
-      - ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN --query "[].{name:name}" --output tsv --prefix $DRONE_BUILD_PARENT'-chefwindowspolicy')"
-      - az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
-      - ls -al
+  # - name: download artifact
+  #   image: mcr.microsoft.com/azure-cli
+  #   environment:
+  #     <<: *drone_vars
+  #   commands:
+  #     - ARTIFACT_NAME="$(az storage blob list --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN --query "[].{name:name}" --output tsv --prefix $DRONE_BUILD_PARENT'-chefwindowspolicy')"
+  #     - az storage blob download --name $ARTIFACT_NAME --file /drone/src/$ARTIFACT_NAME --container-name $AZURE_STORAGE_CONTAINER_NAME --account-name $AZURE_STORAGE_ACCOUNT_NAME --sas-token $AZURE_STORAGE_SAS_TOKEN
+  #     - ls -al
       
   - name: apply policy
     image: chef/chefworkstation
