@@ -105,8 +105,8 @@ steps:
     commands:
       # - ARTIFACT_NAME="$(ls | grep $DRONE_BUILD_PARENT'-chefwindowspolicy')"
       # - echo Deploying Artifact - $ARTIFACT_NAME to $DRONE_DEPLOY_TO
-      - echo $COMP
-      - if [ $COMP = "SQL" ]; then echo "Deploying SQL DACPACs to $DRONE_DEPLOY_TO"; elif [ $COMP = "ADF" ]; then echo "Deploying ADF Pipelines to $DRONE_DEPLOY_TO"; else echo "Deploying both SQL and ADF to $DRONE_DEPLOY_TO"; fi;
+      - echo "$COMP"
+      - if [ "$COMP" = "SQL" ]; then echo "Deploying SQL DACPACs to $DRONE_DEPLOY_TO"; elif [ "$COMP" = "ADF" ]; then echo "Deploying ADF Pipelines to $DRONE_DEPLOY_TO"; else echo "Deploying both SQL and ADF to $DRONE_DEPLOY_TO"; fi;
 
 trigger:
   branch:
